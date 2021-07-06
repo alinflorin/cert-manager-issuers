@@ -1,0 +1,36 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-http
+spec:
+  acme:
+    email: {{ .Values.email }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: letsencrypt-account-key
+    # Add a single challenge solver, HTTP01 using nginx
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-dns
+spec:
+  acme:
+    email: {{ .Values.email }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: letsencrypt-account-key
+    solvers:
+    - dns01:
+        azureDNS:
+          subscriptionID: {{ .Values.azureSubscription }}
+          resourceGroupName: {{ .Values.azureResourceGroup }}
+          hostedZoneName: {{ .Values.azureDnsZone }}
+          # Azure Cloud Environment, default to AzurePublicCloud
+          environment: AzurePublicCloud
